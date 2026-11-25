@@ -21,7 +21,7 @@ Two goals drive every design decision:
 - Runtime: **Deno** on Supabase Edge Functions. Imports use `npm:` specifiers pinned to exact versions.
 - `supabase/functions/_shared/auth.ts`: `verifyBearer(req)` returns `{ userId, email, clientId }` or `null`.
 - `supabase/functions/mcp/index.ts`: Hono app with `basePath("/mcp")`, mcp-lite `McpServer` + `StreamableHttpTransport`, a fresh server built per request (stateless).
-- `consent/index.html`: static consent page on Netlify using supabase-js from esm.sh. `consent/_redirects` rewrites all paths to `index.html`.
+- `consent/index.html`: static consent page on Netlify using supabase-js from esm.sh. There is no `_redirects` file: the Supabase Authorization Path is `/`, so only the root path is served and other paths return 404.
 - `supabase/config.toml`: `verify_jwt = false` for `mcp` (and `sync-deals` when it exists).
 
 Key values (not secrets): Supabase ref `uhwqdkinzofhvdmjumqa`, region `ap-southeast-2`; issuer `https://uhwqdkinzofhvdmjumqa.supabase.co/auth/v1`; consent site `zoho-grok-consent.netlify.app`; company email domain `gdronesolutions.com`; Zoho AU data centre (`accounts.zoho.com.au`, `www.zohoapis.com.au`).
@@ -32,7 +32,7 @@ Key values (not secrets): Supabase ref `uhwqdkinzofhvdmjumqa`, region `ap-southe
 deno cache supabase/functions/mcp/index.ts      # fetch deps
 deno check supabase/functions/mcp/index.ts      # type-check (source of truth, not editor squiggles)
 npx supabase functions deploy mcp               # deploy MCP server
-netlify deploy --prod --dir consent --site zoho-grok-consent   # deploy consent page
+netlify deploy --prod --dir consent --site b578cc7d-1760-4ce3-8c1d-7f6341c717f2 --no-build   # deploy consent page (site ID; the site name lookup fails)
 npx supabase secrets list                       # list secret names
 ```
 

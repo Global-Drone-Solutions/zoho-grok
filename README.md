@@ -57,8 +57,7 @@ zoho-grok/
 │     └─ mcp/
 │        └─ index.ts              # Hono + mcp-lite; metadata endpoint, 401 handling, tools
 ├─ consent/
-│  ├─ index.html                  # OAuth consent page (Microsoft sign-in + Approve)
-│  └─ _redirects                  # Netlify rewrite: every path serves index.html
+│  └─ index.html                  # OAuth consent page (Microsoft sign-in + Approve)
 └─ .vscode/settings.json          # enables the Deno extension for supabase/functions
 ```
 
@@ -110,7 +109,7 @@ deno check supabase/functions/mcp/index.ts
 npx supabase functions deploy mcp
 
 # Deploy the consent page
-netlify deploy --prod --dir consent --site zoho-grok-consent
+netlify deploy --prod --dir consent --site b578cc7d-1760-4ce3-8c1d-7f6341c717f2 --no-build
 ```
 
 Dependencies use `npm:` specifiers pinned to exact versions (currently `hono@4.13.17`, `mcp-lite@0.10.0`, `zod@4.6.7`, `jose@5.9.6`). Only pin versions that were published at least two weeks ago; Deno's minimum dependency age policy rejects very new releases.
