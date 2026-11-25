@@ -1,82 +1,509 @@
 <!doctype html>
-<html>
-  <body>
-    <div id="app">Loading…</div>
-    <script type="module">
-      import { createClient } from "https://esm.sh/@supabase/supabase-js@2"; // Pin an exact version
-      const supabase = createClient(
-        "https://uhwqdkinzofhvdmjumqa.supabase.co",
-        "sb_publishable_xxVhW7nM08GsVLVpuP-3mQ_ROYJrJ8a",
-      );
-      const app = document.getElementById("app");
-      const authorizationId = new URLSearchParams(location.search).get(
-        "authorization_id",
-      );
-
-      // Supabase may name the redirect field differently across versions
-      const redirectOf = (d) => d?.redirect_url ?? d?.redirect_to ?? null;
-
-      function showDebug(label, obj) {
-        const pre = document.createElement("pre");
-        pre.textContent = `${label}\n${JSON.stringify(obj, null, 2)}`;
-        app.replaceChildren(pre);
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="light" />
+    <title>Connect your account · Global Drone Solutions</title>
+    <meta name="description"
+      content="Review and manage an application's access to your Global Drone Solutions account." />
+    <style>
+    :root {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #202020;
+      background: #fff;
+      font-synthesis: none;
+      line-height: 1.5;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-width: 320px;
+    }
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+    button:focus-visible {
+      outline: 2px solid #202020;
+      outline-offset: 4px;
+    }
+    button:disabled {
+      cursor: wait;
+      opacity: .5;
+    }
+    .masthead {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 36px 24px 0;
+    }
+    .brand-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    main {
+      max-width: 560px;
+      margin: 64px auto 0;
+      padding: 0 24px;
+    }
+    .card {
+      border: 1px solid #b8b8b8;
+    }
+    .card-label {
+      padding: 12px 28px;
+      border-bottom: 1px solid #b8b8b8;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 12px;
+      color: #656565;
+    }
+    .card-content {
+      padding: 28px;
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 24px;
+      font-weight: 550;
+      line-height: 1.3;
+      letter-spacing: -.025em;
+      overflow-wrap: anywhere;
+    }
+    .description {
+      margin: 0 0 24px;
+      color: #626262;
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+    .account {
+      padding: 14px 0;
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 24px;
+    }
+    .account-label {
+      color: #666;
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
+    .email {
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+    .section-label {
+      font-size: 14px;
+      font-weight: 550;
+      margin: 0 0 4px;
+    }
+    .permissions {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .permissions li {
+      padding: 12px 0;
+      border-bottom: 1px solid #e8e8e8;
+    }
+    .permission-title {
+      font-size: 14px;
+      font-weight: 500;
+      overflow-wrap: anywhere;
+    }
+    .permission-detail {
+      color: #686868;
+      font-size: 14px;
+      margin-top: 3px;
+    }
+    .notice {
+      color: #686868;
+      font-size: 13px;
+      margin: 20px 0;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    .button {
+      flex: 1;
+      min-width: 0;
+      min-height: 44px;
+      padding: 11px 14px;
+      border: 1px solid #333;
+      border-radius: 0;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .primary {
+      color: #fff;
+      background: #222;
+    }
+    .primary:hover:enabled {
+      background: #444;
+    }
+    .secondary {
+      color: #333;
+      background: #fff;
+      border-color: #b8b8b8;
+    }
+    .secondary:hover:enabled {
+      background: #f5f5f5;
+    }
+    .fine-print {
+      font-size: 12px;
+      color: #686868;
+      margin: 16px 0 0;
+    }
+    .feedback {
+      font-size: 14px;
+      color: #983b2c;
+      padding-top: 16px;
+      border-top: 1px solid #d8bcb6;
+      margin: 20px 0 0;
+    }
+    .loading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #686868;
+      font-size: 14px;
+      margin-top: 24px;
+    }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 1px solid #ddd;
+      border-top-color: #333;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    footer {
+      max-width: 560px;
+      margin: 18px auto 36px;
+      padding: 0 24px;
+      font-size: 12px;
+      color: #777;
+    }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
       }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .spinner {
+        animation: none;
+      }
+    }
+    @media (max-width: 480px) {
+      .masthead {
+        padding-top: 24px;
+      }
+      main {
+        margin-top: 36px;
+        padding: 0 20px;
+      }
+      .card-label {
+        padding: 12px 20px;
+      }
+      .card-content {
+        padding: 24px 20px;
+      }
+      h1 {
+        font-size: 22px;
+      }
+      footer {
+        padding: 0 20px;
+      }
+    }
+    </style>
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="brand-name">Global Drone Solutions</div>
+    </header>
+    <main>
+      <section class="card" aria-labelledby="title" aria-busy="true" id="card">
+        <div class="card-label">Account access</div>
+        <div class="card-content">
+          <div id="content" aria-live="polite">
+            <h1 id="title">Checking your connection</h1>
+            <p
+              class="description">Checking your account and the access request.</p>
+            <div
+              class="loading"><span class="spinner" aria-hidden="true"></span>Please wait…</div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer>Only connect applications you trust.</footer>
+    <noscript><p style="text-align:center;padding:20px">Enable JavaScript to review this connection request.</p></noscript>
+    <script type="module">
+    const content = document.getElementById("content");
+    const card = document.getElementById("card");
+    const authorizationId = new URLSearchParams(location.search).get(
+      "authorization_id",
+    );
+    let supabase;
+    let busy = false;
+    const redirectOf = (data) => data?.redirect_url ?? data?.redirect_to ?? null;
 
-      if (!authorizationId) {
-        app.textContent =
-          "Missing authorization_id. Start the connection again from your MCP client.";
-      } else {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        if (!session) {
-          // Not signed in: sign in with Microsoft first, keeping authorization_id in the return URL
-          await supabase.auth.signInWithOAuth({
+    // All remote data, including dynamically registered client names, is plain text.
+    function element(tag, className, text) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = text;
+      return node;
+    }
+
+    function screen(title, description) {
+      const heading = element("h1", "", title);
+      heading.id = "title";
+      content.replaceChildren(heading, element("p", "description", description));
+      card.setAttribute("aria-busy", "false");
+    }
+
+    function button(label, style, action) {
+      const node = element("button", `button ${style}`, label);
+      node.type = "button";
+      node.addEventListener("click", action);
+      return node;
+    }
+
+    function showError(title, description, retry) {
+      screen(title, description);
+      if (retry) {
+        const actions = element("div", "actions");
+        actions.append(button("Try again", "primary", retry));
+        content.append(actions);
+      }
+    }
+
+    function feedback(message) {
+      let node = document.getElementById("feedback");
+      if (!node) {
+        node = element("p", "feedback");
+        node.id = "feedback";
+        node.setAttribute("role", "alert");
+        content.append(node);
+      }
+      node.textContent = message;
+    }
+
+    function setBusy(value) {
+      busy = value;
+      card.setAttribute("aria-busy", String(value));
+      for (const node of content.querySelectorAll("button")) node.disabled = value;
+    }
+
+    function redirect(data) {
+      const target = redirectOf(data);
+      if (!target) return false;
+      screen(
+        "Returning to your application",
+        "Your decision has been saved. You’ll be redirected in a moment.",
+      );
+      location.assign(target);
+      return true;
+    }
+
+    function showSignIn() {
+      screen(
+        "Sign in to continue",
+        "Use your company Microsoft account. You’ll review the application’s access request after signing in.",
+      );
+      const actions = element("div", "actions");
+      const signIn = button("Continue with Microsoft", "primary", async () => {
+        if (busy) return;
+        setBusy(true);
+        signIn.textContent = "Opening Microsoft…";
+        try {
+          const { error } = await supabase.auth.signInWithOAuth({
             provider: "azure",
+            // Preserve authorization_id through the existing Microsoft sign-in round trip.
             options: { scopes: "email", redirectTo: location.href },
           });
-        } else {
-          const { data: details, error } =
-            await supabase.auth.oauth.getAuthorizationDetails(authorizationId);
-          if (error) {
-            app.textContent = "Invalid authorization request: " + error.message;
-          } else if (redirectOf(details)) {
-            // Already approved before: Supabase hands back the redirect directly
-            location.href = redirectOf(details);
-          } else {
-            // Build the DOM with textContent: the client name comes from dynamic registration and must not be trusted as HTML
-            const p = document.createElement("p");
-            const name = document.createElement("b");
-            name.textContent =
-              details?.client?.name ??
-              details?.client?.client_name ??
-              "An application";
-            p.append(
-              name,
-              ` is requesting read-only access to Deals as ${session.user.email}.`,
+          if (error) throw error;
+        } catch {
+          setBusy(false);
+          signIn.textContent = "Continue with Microsoft";
+          feedback(
+            "We couldn’t open Microsoft sign-in. Check your connection and try again.",
+          );
+        }
+      });
+      actions.append(signIn);
+      content.append(
+        actions,
+        element("p", "fine-print", "Signing in does not approve this connection."),
+      );
+    }
+
+    function permission(list, title, description) {
+      const item = element("li");
+      const copy = element("div");
+      copy.append(
+        element("div", "permission-title", title),
+        element("div", "permission-detail", description),
+      );
+      item.append(copy);
+      list.append(item);
+    }
+
+    function showConsent(details, session) {
+      const clientName = details?.client?.name ?? details?.client?.client_name ??
+        "This application";
+      screen(
+        "Allow this connection?",
+        `${clientName} is requesting access to your Global Drone Solutions account.`,
+      );
+      const account = element("div", "account");
+      const email = session.user.email || "Company account";
+      const accountCopy = element("div");
+      accountCopy.append(
+        element("div", "account-label", "Signed in as"),
+        element("div", "email", email),
+      );
+      account.append(accountCopy);
+      const list = element("ul", "permissions");
+      permission(
+        list,
+        "Account identity",
+        "Your user ID, email address and the application’s client ID.",
+      );
+      const scopeDescriptions = {
+        openid: [
+          "Confirm your identity",
+          "Use your account to identify you when you connect.",
+        ],
+        email: [
+          "Read your email address",
+          "Access the email address associated with your account.",
+        ],
+        profile: [
+          "Read your basic profile",
+          "Access profile information associated with your account.",
+        ],
+        phone: [
+          "Read your phone number",
+          "Access the phone number associated with your account.",
+        ],
+        offline_access: [
+          "Stay connected",
+          "Maintain access using refresh tokens when you are away.",
+        ],
+      };
+      const scopes = [
+        ...new Set(String(details.scope ?? "").split(/\s+/).filter(Boolean)),
+      ];
+      for (const scope of scopes) {
+        const [title, description] = scopeDescriptions[scope] ??
+          [scope, "An additional permission requested by this application."];
+        permission(list, title, description);
+      }
+      const actions = element("div", "actions");
+      const approve = button("Allow connection", "primary", () => decide(true));
+      const deny = button("Don’t allow", "secondary", () => decide(false));
+      actions.append(deny, approve);
+      content.append(
+        account,
+        element("p", "section-label", "Requested access"),
+        list,
+        element(
+          "p",
+          "notice",
+          "Identity checks only. Zoho Deals access is not available yet.",
+        ),
+        actions,
+      );
+
+      async function decide(allowed) {
+        if (busy) return;
+        setBusy(true);
+        const activeButton = allowed ? approve : deny;
+        const label = activeButton.textContent;
+        activeButton.textContent = allowed ? "Connecting…" : "Declining…";
+        document.getElementById("feedback")?.remove();
+        try {
+          const method = allowed ? "approveAuthorization" : "denyAuthorization";
+          const { data, error } = await supabase.auth.oauth[method](
+            authorizationId,
+            { skipBrowserRedirect: true },
+          );
+          if (error) throw error;
+          if (!redirect(data)) {
+            showError(
+              allowed ? "Connection approved" : "Connection declined",
+              "Your decision was saved, but we couldn’t return you to the application. Close this tab and return to the application to check the connection.",
             );
-            const button = document.createElement("button");
-            button.textContent = "Approve";
-            button.onclick = async () => {
-              button.disabled = true;
-              const { data, error } =
-                await supabase.auth.oauth.approveAuthorization(authorizationId);
-              if (error) {
-                app.textContent = "Approval failed: " + error.message;
-                return;
-              }
-              const target = redirectOf(data);
-              if (target) location.href = target;
-              else
-                showDebug(
-                  "Approved, but no redirect URL was returned. Response:",
-                  data,
-                );
-            };
-            app.replaceChildren(p, button);
           }
+        } catch {
+          setBusy(false);
+          activeButton.textContent = label;
+          feedback(
+            "We couldn’t confirm your decision. Try again. If the request has expired, start a new connection from your application.",
+          );
         }
       }
+    }
+
+    async function start() {
+      if (!authorizationId) {
+        showError(
+          "Start from your application",
+          "This page needs a connection request. Return to Grok or your MCP client and choose to connect Global Drone Solutions, then follow the sign-in link.",
+        );
+        return;
+      }
+      screen(
+        "Checking your connection",
+        "Checking your account and the access request.",
+      );
+      const loading = element("div", "loading");
+      const spinner = element("span", "spinner");
+      spinner.setAttribute("aria-hidden", "true");
+      loading.append(spinner, document.createTextNode("Please wait…"));
+      content.append(loading);
+      card.setAttribute("aria-busy", "true");
+      try {
+        if (!supabase) {
+          const { createClient } = await import(
+            "https://esm.sh/@supabase/supabase-js@2.119.0"
+          );
+          supabase = createClient(
+            "https://uhwqdkinzofhvdmjumqa.supabase.co",
+            "sb_publishable_xxVhW7nM08GsVLVpuP-3mQ_ROYJrJ8a",
+          );
+        }
+        const { data: { session }, error: sessionError } = await supabase.auth
+          .getSession();
+        if (sessionError) throw sessionError;
+        if (!session) {
+          showSignIn();
+          return;
+        }
+        const { data: details, error } = await supabase.auth.oauth
+          .getAuthorizationDetails(authorizationId);
+        if (error) {
+          if (![400, 404, 410].includes(error.status)) throw error;
+          showError(
+            "This request is no longer available",
+            "It may have expired or already been used. Return to your application and start a new connection.",
+          );
+          return;
+        }
+        if (!details) throw new Error("Missing authorization details");
+        if (redirect(details)) return;
+        showConsent(details, session);
+      } catch {
+        showError(
+          "We couldn’t load this request",
+          "Check your internet connection and try again. If the problem continues, contact your Global Drone Solutions administrator.",
+          supabase ? start : () => location.reload(),
+        );
+      }
+    }
+    start();
     </script>
   </body>
 </html>
