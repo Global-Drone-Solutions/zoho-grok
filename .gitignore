@@ -1,0 +1,9 @@
+# Local Netlify folder
+.netlify
+
+# Local environment and system files
+.env
+.env.*
+!.env.example
+.DS_Store
+node_modules/

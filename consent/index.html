@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+  <body>
+    <div id="app">Loading…</div>
+    <script type="module">
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2"; // Pin an exact version
+      const supabase = createClient(
+        "https://uhwqdkinzofhvdmjumqa.supabase.co",
+        "sb_publishable_xxVhW7nM08GsVLVpuP-3mQ_ROYJrJ8a",
+      );
+      const app = document.getElementById("app");
+      const authorizationId = new URLSearchParams(location.search).get(
+        "authorization_id",
+      );
+
+      // Supabase may name the redirect field differently across versions
+      const redirectOf = (d) => d?.redirect_url ?? d?.redirect_to ?? null;
+
+      function showDebug(label, obj) {
+        const pre = document.createElement("pre");
+        pre.textContent = `${label}\n${JSON.stringify(obj, null, 2)}`;
+        app.replaceChildren(pre);
+      }
+
+      if (!authorizationId) {
+        app.textContent =
+          "Missing authorization_id. Start the connection again from your MCP client.";
+      } else {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session) {
+          // Not signed in: sign in with Microsoft first, keeping authorization_id in the return URL
+          await supabase.auth.signInWithOAuth({
+            provider: "azure",
+            options: { scopes: "email", redirectTo: location.href },
+          });
+        } else {
+          const { data: details, error } =
+            await supabase.auth.oauth.getAuthorizationDetails(authorizationId);
+          if (error) {
+            app.textContent = "Invalid authorization request: " + error.message;
+          } else if (redirectOf(details)) {
+            // Already approved before: Supabase hands back the redirect directly
+            location.href = redirectOf(details);
+          } else {
+            // Build the DOM with textContent: the client name comes from dynamic registration and must not be trusted as HTML
+            const p = document.createElement("p");
+            const name = document.createElement("b");
+            name.textContent =
+              details?.client?.name ??
+              details?.client?.client_name ??
+              "An application";
+            p.append(
+              name,
+              ` is requesting read-only access to Deals as ${session.user.email}.`,
+            );
+            const button = document.createElement("button");
+            button.textContent = "Approve";
+            button.onclick = async () => {
+              button.disabled = true;
+              const { data, error } =
+                await supabase.auth.oauth.approveAuthorization(authorizationId);
+              if (error) {
+                app.textContent = "Approval failed: " + error.message;
+                return;
+              }
+              const target = redirectOf(data);
+              if (target) location.href = target;
+              else
+                showDebug(
+                  "Approved, but no redirect URL was returned. Response:",
+                  data,
+                );
+            };
+            app.replaceChildren(p, button);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
